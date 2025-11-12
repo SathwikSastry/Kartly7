@@ -45,6 +45,7 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Custom Kartly7 Tokens */
+    --neon-gold: 45 100% 51%;
     --neon-cyan: 180 100% 50%;
     --neon-purple: 270 60% 45%;
     --neon-magenta: 300 100% 50%;

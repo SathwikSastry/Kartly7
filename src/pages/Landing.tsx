@@ -1,5 +1,6 @@
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { CustomCursor } from "@/components/CustomCursor";
+import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
 import { WhyKartly7 } from "@/components/WhyKartly7";
 import { FeaturedProduct } from "@/components/FeaturedProduct";
@@ -16,6 +17,7 @@ const Landing = () => {
     <div className="relative min-h-screen">
       <ParticleBackground />
       <CustomCursor />
+      <Navigation />
       
       <main>
         <HeroSection />

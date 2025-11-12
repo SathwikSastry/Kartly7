@@ -7,7 +7,10 @@ import { ShoppingCart, Heart, Share2, ArrowLeft, CheckCircle2 } from "lucide-rea
 import { Link } from "react-router-dom";
 import cozycupImage from "@/assets/cozycup-hero.jpg";
 import { Footer } from "@/components/Footer";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useCart } from "@/contexts/CartContext";
+import { GoldenStarAnimation } from "@/components/GoldenStarAnimation";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Product Page - Detailed view of CozyCup product
@@ -15,10 +18,42 @@ import { useEffect } from "react";
  * Responsive design with scroll-triggered animations
  */
 const Product = () => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+  const [showStarAnimation, setShowStarAnimation] = useState(false);
+  const [animationPositions, setAnimationPositions] = useState({ start: { x: 0, y: 0 }, end: { x: 0, y: 0 } });
+  const addToCartButtonRef = useRef<HTMLButtonElement>(null);
+
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const handleAddToCart = () => {
+    const buttonRect = addToCartButtonRef.current?.getBoundingClientRect();
+    const cartIcon = document.querySelector('[data-cart-icon]')?.getBoundingClientRect();
+
+    if (buttonRect && cartIcon) {
+      setAnimationPositions({
+        start: { x: buttonRect.left + buttonRect.width / 2, y: buttonRect.top + buttonRect.height / 2 },
+        end: { x: cartIcon.left + cartIcon.width / 2, y: cartIcon.top + cartIcon.height / 2 },
+      });
+      setShowStarAnimation(true);
+    }
+
+    addToCart({
+      id: 'cozycup',
+      name: 'CozyCup',
+      price: 599,
+      image: cozycupImage,
+    });
+
+    toast({
+      title: "Added to Cart!",
+      description: "CozyCup has been added to your cart",
+    });
+  };
+
   const benefits = [
     "Keeps drinks hot for 6+ hours, cold for 12+ hours",
     "Premium 304 stainless steel construction",
@@ -50,6 +85,11 @@ const Product = () => {
             KARTLY7
           </h2>
           <div className="flex gap-2">
+            <Link to="/cart">
+              <Button variant="ghost" size="icon" data-cart-icon>
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+            </Link>
             <Button variant="ghost" size="icon">
               <Heart className="w-5 h-5" />
             </Button>
@@ -59,6 +99,15 @@ const Product = () => {
           </div>
         </div>
       </motion.nav>
+
+      {/* Golden Star Animation */}
+      {showStarAnimation && (
+        <GoldenStarAnimation
+          startPosition={animationPositions.start}
+          endPosition={animationPositions.end}
+          onComplete={() => setShowStarAnimation(false)}
+        />
+      )}
 
       <main className="container max-w-6xl mx-auto px-4 py-12">
         {/* Hero Product Section */}
@@ -123,7 +172,13 @@ const Product = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="hero" size="lg" className="flex-1">
+              <Button 
+                ref={addToCartButtonRef}
+                onClick={handleAddToCart}
+                variant="hero" 
+                size="lg" 
+                className="flex-1"
+              >
                 <ShoppingCart className="mr-2" />
                 Add to Cart
               </Button>
