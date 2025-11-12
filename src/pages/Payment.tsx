@@ -26,17 +26,30 @@ const Payment = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: "Please upload an image smaller than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      setScreenshot(file);
+    if (!file) return;
+    
+    // Validate file size
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
     }
+    
+    // Validate MIME type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Only JPG, PNG, and WEBP images are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setScreenshot(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

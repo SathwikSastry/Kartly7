@@ -44,7 +44,10 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
     
     if (authError || !user) {
-      console.error('Authentication error:', authError)
+      console.error('Authentication failed', {
+        timestamp: new Date().toISOString(),
+        error_type: 'AUTH_FAILED'
+      })
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -125,7 +128,11 @@ Deno.serve(async (req) => {
       }])
 
     if (insertError) {
-      console.error('Database insert error:', insertError)
+      console.error('Order creation failed', {
+        timestamp: new Date().toISOString(),
+        user_id: user.id,
+        error_code: insertError.code
+      })
       return new Response(
         JSON.stringify({ error: 'Failed to create order' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -139,7 +146,10 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
-    console.error('Error in submit-order function:', error)
+    console.error('Order submission error', {
+      timestamp: new Date().toISOString(),
+      error_type: 'INTERNAL_ERROR'
+    })
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

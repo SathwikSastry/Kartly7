@@ -27,7 +27,7 @@ export type Database = {
           status: string | null
           total_amount: number
           transaction_id: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           address: string
@@ -41,7 +41,7 @@ export type Database = {
           status?: string | null
           total_amount: number
           transaction_id?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           address?: string
@@ -55,7 +55,7 @@ export type Database = {
           status?: string | null
           total_amount?: number
           transaction_id?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
