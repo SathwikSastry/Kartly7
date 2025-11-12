@@ -1,14 +1,42 @@
 import { motion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShoppingCart, User, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Navigation - Floating glassmorphic navigation bar
- * Features cart icon with item count badge
+ * Features cart icon with item count badge and authentication
  */
 export const Navigation = () => {
   const { totalItems } = useCart();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out.",
+    });
+    navigate('/');
+  };
 
   return (
     <motion.nav
@@ -25,25 +53,55 @@ export const Navigation = () => {
             </h1>
           </Link>
 
-          {/* Cart Icon */}
-          <Link to="/cart" className="relative">
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
-            >
-              <ShoppingCart className="w-6 h-6 text-primary" />
-              {totalItems > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-neon-gold text-background text-xs font-bold rounded-full flex items-center justify-center shadow-neon-gold"
+          <div className="flex items-center gap-4">
+            {/* Auth Status */}
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:inline truncate max-w-[150px]">
+                  {user.email}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-2"
                 >
-                  {totalItems}
-                </motion.span>
-              )}
-            </motion.div>
-          </Link>
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/auth')}
+                className="gap-2"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Button>
+            )}
+
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+              >
+                <ShoppingCart className="w-6 h-6 text-primary" />
+                {totalItems > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-neon-gold text-background text-xs font-bold rounded-full flex items-center justify-center shadow-neon-gold"
+                  >
+                    {totalItems}
+                  </motion.span>
+                )}
+              </motion.div>
+            </Link>
+          </div>
         </div>
       </div>
     </motion.nav>

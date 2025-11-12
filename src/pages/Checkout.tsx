@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Checkout Page - Collects customer shipping information
@@ -25,9 +26,21 @@ const Checkout = () => {
     address: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check authentication first
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to continue with checkout",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
     // Validate form
     if (!formData.name || !formData.email || !formData.phone || !formData.address) {
       toast({

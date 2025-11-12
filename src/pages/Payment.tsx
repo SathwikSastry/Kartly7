@@ -61,42 +61,50 @@ const Payment = () => {
     setIsSubmitting(true);
 
     try {
-      let screenshotUrl = null;
+      // Check authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to place an order",
+          variant: "destructive",
+        });
+        navigate('/auth');
+        return;
+      }
+
+      let screenshotPath = null;
 
       // Upload screenshot if provided
       if (screenshot) {
         const fileExt = screenshot.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const userId = session.user.id;
+        const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('payment_screenshots')
           .upload(fileName, screenshot);
 
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('payment_screenshots')
-          .getPublicUrl(fileName);
         
-        screenshotUrl = publicUrl;
+        screenshotPath = fileName;
       }
 
-      // Insert order into database
-      const { error: insertError } = await supabase
-        .from('orders')
-        .insert([{
+      // Submit order via edge function with server-side validation
+      const { data, error } = await supabase.functions.invoke('submit-order', {
+        body: {
           customer_name: customerInfo.name,
           email: customerInfo.email,
           phone: customerInfo.phone,
           address: customerInfo.address,
-          products: items as any,
+          products: items,
           total_amount: totalAmount,
-          payment_screenshot_url: screenshotUrl,
+          screenshot_path: screenshotPath,
           transaction_id: transactionId || null,
-          status: 'Pending Verification',
-        }]);
+        }
+      });
 
-      if (insertError) throw insertError;
+      if (error) throw error;
 
       // Clear cart and checkout data
       clearCart();
@@ -104,10 +112,9 @@ const Payment = () => {
       
       navigate('/success');
     } catch (error: any) {
-      console.error('Order submission error:', error);
       toast({
         title: "Order Submission Failed",
-        description: error.message || "Please try again later",
+        description: "Please try again later",
         variant: "destructive",
       });
     } finally {
