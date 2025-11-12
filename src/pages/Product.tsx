@@ -7,6 +7,7 @@ import { ShoppingCart, Heart, Share2, ArrowLeft, CheckCircle2 } from "lucide-rea
 import { Link } from "react-router-dom";
 import cozycupImage from "@/assets/cozycup-hero.jpg";
 import { Footer } from "@/components/Footer";
+import { useEffect } from "react";
 
 /**
  * Product Page - Detailed view of CozyCup product
@@ -14,6 +15,10 @@ import { Footer } from "@/components/Footer";
  * Responsive design with scroll-triggered animations
  */
 const Product = () => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const benefits = [
     "Keeps drinks hot for 6+ hours, cold for 12+ hours",
     "Premium 304 stainless steel construction",

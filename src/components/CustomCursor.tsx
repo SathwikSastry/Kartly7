@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 /**
- * CustomCursor - Creates a radial gradient lighting effect that follows the mouse cursor
- * Provides a futuristic, immersive feel to the interface
+ * CustomCursor - Creates a radial gradient lightning effect that follows the default cursor
+ * Provides a futuristic, immersive feel while maintaining native cursor functionality
  */
 export const CustomCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -18,10 +18,9 @@ export const CustomCursor = () => {
 
   return (
     <div
-      className="custom-cursor"
+      className="pointer-events-none fixed inset-0 z-50"
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+        background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(0, 255, 255, 0.15), transparent 40%)`,
       }}
     />
   );

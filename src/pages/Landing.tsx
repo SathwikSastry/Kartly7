@@ -3,6 +3,7 @@ import { CustomCursor } from "@/components/CustomCursor";
 import { HeroSection } from "@/components/HeroSection";
 import { WhyKartly7 } from "@/components/WhyKartly7";
 import { FeaturedProduct } from "@/components/FeaturedProduct";
+import { SocialHandles } from "@/components/SocialHandles";
 import { Footer } from "@/components/Footer";
 
 /**
@@ -18,8 +19,9 @@ const Landing = () => {
       
       <main>
         <HeroSection />
-        <WhyKartly7 />
         <FeaturedProduct />
+        <WhyKartly7 />
+        <SocialHandles />
       </main>
 
       <Footer />

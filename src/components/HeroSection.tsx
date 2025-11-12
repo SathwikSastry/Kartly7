@@ -31,23 +31,42 @@ export const HeroSection = () => {
           </h2>
         </motion.div>
 
-        {/* Split-text animated heading */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold mb-6 leading-tight">
-          {splitText.map((char, index) => (
-            <motion.span
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.03,
-                ease: "easeOut",
-              }}
-              className="inline-block"
-            >
-              {char === " " ? "\u00A0" : char}
-            </motion.span>
-          ))}
+        {/* Split-text animated heading with proper line breaks */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-heading font-bold mb-6 leading-tight px-4">
+          <span className="block">
+            {splitText.slice(0, 17).map((char, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.5,
+                  delay: index * 0.03,
+                  ease: "easeOut",
+                }}
+                className="inline-block"
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+          </span>
+          <span className="block">
+            {splitText.slice(17).map((char, index) => (
+              <motion.span
+                key={index + 17}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.5,
+                  delay: (index + 17) * 0.03,
+                  ease: "easeOut",
+                }}
+                className="inline-block"
+              >
+                {char === " " ? "\u00A0" : char}
+              </motion.span>
+            ))}
+          </span>
         </h1>
 
         {/* Subheadline with fade-in */}
@@ -78,21 +97,6 @@ export const HeroSection = () => {
           </Button>
         </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2 }}
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 border-2 border-primary rounded-full flex justify-center pt-2"
-          >
-            <div className="w-1 h-2 bg-primary rounded-full" />
-          </motion.div>
-        </motion.div>
       </div>
     </section>
   );
