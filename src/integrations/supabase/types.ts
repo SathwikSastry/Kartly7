@@ -59,24 +59,6 @@ export type Database = {
         }
         Relationships: []
       }
-      Orders: {
-        Row: {
-          created_at: string
-          id: number
-          Number_of_orders: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          Number_of_orders?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          Number_of_orders?: number | null
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
