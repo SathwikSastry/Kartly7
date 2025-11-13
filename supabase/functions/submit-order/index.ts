@@ -7,8 +7,6 @@ const corsHeaders = {
 
 interface OrderProduct {
   id: string
-  name: string
-  price: number
   quantity: number
 }
 
@@ -18,7 +16,7 @@ interface OrderRequest {
   phone: string
   address: string
   products: OrderProduct[]
-  total_amount: number
+  points_to_redeem?: number
   transaction_id?: string
   screenshot_path?: string
 }
@@ -94,9 +92,9 @@ Deno.serve(async (req) => {
       )
     }
 
+    // Validate product structure
     for (const product of body.products) {
-      if (!product.id || !product.name || typeof product.price !== 'number' || product.price <= 0 ||
-          typeof product.quantity !== 'number' || product.quantity <= 0 || !Number.isInteger(product.quantity)) {
+      if (!product.id || typeof product.quantity !== 'number' || product.quantity <= 0 || !Number.isInteger(product.quantity)) {
         return new Response(
           JSON.stringify({ error: 'Invalid product data' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -104,15 +102,120 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (typeof body.total_amount !== 'number' || body.total_amount <= 0) {
+    // Validate points redemption amount
+    const pointsToRedeem = body.points_to_redeem || 0
+    if (typeof pointsToRedeem !== 'number' || pointsToRedeem < 0 || !Number.isInteger(pointsToRedeem)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid total amount' }),
+        JSON.stringify({ error: 'Invalid points redemption amount' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Fetch product prices from database and calculate server-side total
+    const productIds = body.products.map(p => p.id)
+    const { data: productsData, error: productsError } = await supabaseClient
+      .from('products')
+      .select('id, name, price')
+      .in('id', productIds)
+
+    if (productsError) {
+      console.error('Failed to fetch products', {
+        timestamp: new Date().toISOString(),
+        error_code: productsError.code
+      })
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify product prices' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Verify all products exist
+    if (productsData.length !== productIds.length) {
+      return new Response(
+        JSON.stringify({ error: 'One or more products not found' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Calculate actual total from database prices
+    const productMap = new Map(productsData.map(p => [p.id, p]))
+    let calculatedTotal = 0
+    const orderProducts = []
+
+    for (const item of body.products) {
+      const product = productMap.get(item.id)
+      if (!product) {
+        return new Response(
+          JSON.stringify({ error: `Product ${item.id} not found` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      const itemTotal = Number(product.price) * item.quantity
+      calculatedTotal += itemTotal
+      orderProducts.push({
+        id: product.id,
+        name: product.name,
+        price: Number(product.price),
+        quantity: item.quantity
+      })
+    }
+
+    // Verify and process points redemption
+    let pointsDiscount = 0
+    let actualPointsToRedeem = 0
+
+    if (pointsToRedeem > 0) {
+      // Fetch user's current points
+      const { data: userPointsData, error: pointsError } = await supabaseClient
+        .from('user_points')
+        .select('total_points')
+        .eq('user_id', user.id)
+        .single()
+
+      if (pointsError && pointsError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Failed to fetch user points', {
+          timestamp: new Date().toISOString(),
+          error_code: pointsError.code
+        })
+        return new Response(
+          JSON.stringify({ error: 'Failed to verify points balance' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const availablePoints = userPointsData?.total_points || 0
+
+      // Verify user has enough points
+      if (pointsToRedeem > availablePoints) {
+        return new Response(
+          JSON.stringify({ error: 'Insufficient points balance' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Calculate discount (100 points = ₹10)
+      pointsDiscount = (pointsToRedeem / 100) * 10
+
+      // Ensure discount doesn't exceed order total
+      if (pointsDiscount > calculatedTotal) {
+        pointsDiscount = calculatedTotal
+        actualPointsToRedeem = Math.floor((calculatedTotal / 10) * 100)
+      } else {
+        actualPointsToRedeem = pointsToRedeem
+      }
+    }
+
+    const finalTotal = calculatedTotal - pointsDiscount
+
+    if (finalTotal < 0) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid order total after discount' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
     // Insert order into database
-    const { error: insertError } = await supabaseClient
+    const { data: orderData, error: insertError } = await supabaseClient
       .from('orders')
       .insert([{
         user_id: user.id,
@@ -120,12 +223,14 @@ Deno.serve(async (req) => {
         email: body.email.trim().toLowerCase(),
         phone: body.phone,
         address: body.address.trim(),
-        products: body.products,
-        total_amount: body.total_amount,
+        products: orderProducts,
+        total_amount: finalTotal,
         payment_screenshot_url: body.screenshot_path || null,
         transaction_id: body.transaction_id?.trim() || null,
         status: 'Pending Verification',
       }])
+      .select('id')
+      .single()
 
     if (insertError) {
       console.error('Order creation failed', {
@@ -139,10 +244,108 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log(`Order created successfully for user ${user.id}`)
+    const orderId = orderData.id
+
+    // Calculate points earned (5 points per ₹100)
+    const pointsEarned = Math.floor(finalTotal / 100) * 5
+
+    // Update user points atomically (deduct redeemed, add earned)
+    const netPointsChange = pointsEarned - actualPointsToRedeem
+
+    if (netPointsChange !== 0 || actualPointsToRedeem > 0) {
+      // Ensure user_points record exists
+      const { data: existingPoints } = await supabaseClient
+        .from('user_points')
+        .select('id, total_points')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!existingPoints) {
+        // Create initial points record
+        const { error: createError } = await supabaseClient
+          .from('user_points')
+          .insert({
+            user_id: user.id,
+            total_points: Math.max(0, netPointsChange),
+            tier: 'Bronze'
+          })
+
+        if (createError) {
+          console.error('Failed to create user points', {
+            timestamp: new Date().toISOString(),
+            user_id: user.id,
+            error_code: createError.code
+          })
+        }
+      } else {
+        // Update existing points
+        const newTotal = existingPoints.total_points + netPointsChange
+        const { error: updateError } = await supabaseClient
+          .from('user_points')
+          .update({ total_points: Math.max(0, newTotal) })
+          .eq('user_id', user.id)
+
+        if (updateError) {
+          console.error('Failed to update user points', {
+            timestamp: new Date().toISOString(),
+            user_id: user.id,
+            error_code: updateError.code
+          })
+        }
+      }
+
+      // Record points transactions
+      const transactions = []
+      
+      if (actualPointsToRedeem > 0) {
+        transactions.push({
+          user_id: user.id,
+          order_id: orderId,
+          points_change: -actualPointsToRedeem,
+          transaction_type: 'redeemed',
+          description: `Redeemed ${actualPointsToRedeem} points for ₹${pointsDiscount.toFixed(2)} discount`
+        })
+      }
+
+      if (pointsEarned > 0) {
+        transactions.push({
+          user_id: user.id,
+          order_id: orderId,
+          points_change: pointsEarned,
+          transaction_type: 'earned',
+          description: `Earned ${pointsEarned} points from order`
+        })
+      }
+
+      if (transactions.length > 0) {
+        const { error: transactionError } = await supabaseClient
+          .from('points_transactions')
+          .insert(transactions)
+
+        if (transactionError) {
+          console.error('Failed to record points transactions', {
+            timestamp: new Date().toISOString(),
+            user_id: user.id,
+            error_code: transactionError.code
+          })
+        }
+      }
+    }
+
+    console.log(`Order created successfully for user ${user.id}`, {
+      order_id: orderId,
+      total: finalTotal,
+      points_earned: pointsEarned,
+      points_redeemed: actualPointsToRedeem
+    })
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ 
+        success: true, 
+        order_id: orderId,
+        points_earned: pointsEarned,
+        points_redeemed: actualPointsToRedeem
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

@@ -16,6 +16,7 @@ const Success = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const { userPoints } = useUserPoints(userId);
   const [orderAmount, setOrderAmount] = useState(0);
+  const [pointsEarned, setPointsEarned] = useState(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,13 +26,12 @@ const Success = () => {
       setUserId(session?.user?.id || null);
     });
 
-    // Retrieve order amount from sessionStorage
-    const checkoutData = sessionStorage.getItem('checkout-data');
-    if (checkoutData) {
-      const data = JSON.parse(checkoutData);
-      const amount = parseFloat(sessionStorage.getItem('order-total') || '0');
-      setOrderAmount(amount || 0);
-    }
+    // Retrieve order data from sessionStorage
+    const amount = parseFloat(sessionStorage.getItem('order-total') || '0');
+    const earned = parseInt(sessionStorage.getItem('points-earned') || '0', 10);
+    
+    setOrderAmount(amount);
+    setPointsEarned(earned);
   }, []);
 
   return (
@@ -109,7 +109,7 @@ const Success = () => {
             </div>
 
             {/* Points Earned Display */}
-            {userPoints && orderAmount > 0 && (
+            {pointsEarned > 0 && userPoints && (
               <div className="mb-8">
                 <EarnedPointsDisplay 
                   orderAmount={orderAmount}

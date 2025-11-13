@@ -10,8 +10,6 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useUserPoints } from "@/hooks/useUserPoints";
-import { calculatePointsEarned } from "@/utils/points";
 
 /**
  * Payment Page - UPI payment verification
@@ -21,8 +19,6 @@ const Payment = () => {
   const navigate = useNavigate();
   const { items, totalAmount, clearCart } = useCart();
   const { toast } = useToast();
-  const [userId, setUserId] = useState<string | null>(null);
-  const { updatePoints } = useUserPoints(userId);
   
   const [transactionId, setTransactionId] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -31,10 +27,6 @@ const Payment = () => {
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserId(session?.user?.id || null);
-    });
-
     // Get points discount from checkout data
     const checkoutData = sessionStorage.getItem('checkout-data');
     if (checkoutData) {
@@ -132,8 +124,8 @@ const Payment = () => {
           email: customerInfo.email,
           phone: customerInfo.phone,
           address: customerInfo.address,
-          products: items,
-          total_amount: finalAmount,
+          products: items.map(item => ({ id: item.id, quantity: item.quantity })),
+          points_to_redeem: pointsToRedeem,
           screenshot_path: screenshotPath,
           transaction_id: transactionId || null,
         }
@@ -141,17 +133,10 @@ const Payment = () => {
 
       if (error) throw error;
 
-      // Calculate and award points for the order
-      const pointsEarned = calculatePointsEarned(finalAmount);
-      
-      // Update user points (add earned, subtract redeemed)
-      const netPointsChange = pointsEarned - pointsToRedeem;
-      if (netPointsChange !== 0) {
-        await updatePoints(netPointsChange, data.order_id);
-      }
-
-      // Store order total for success page
+      // Store order details for success page
       sessionStorage.setItem('order-total', finalAmount.toString());
+      sessionStorage.setItem('points-earned', data.points_earned?.toString() || '0');
+      sessionStorage.setItem('points-redeemed', data.points_redeemed?.toString() || '0');
 
       // Clear cart and checkout data
       clearCart();
