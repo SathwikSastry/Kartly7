@@ -3,10 +3,13 @@ import { Button } from "./ui/button";
 import { GlassCard } from "./ui/glass-card";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import cozycupImage from "@/assets/cozycup-hero.jpg";
+import { products } from "@/data/products";
+
+// Get the first product as featured (can be customized)
+const featuredProduct = products[0];
 
 /**
- * FeaturedProduct - Showcase section for the hero product (CozyCup)
+ * FeaturedProduct - Showcase section for the hero product
  * Features 3D rotation effect and scroll-triggered reveal animation
  */
 export const FeaturedProduct = () => {
@@ -43,8 +46,8 @@ export const FeaturedProduct = () => {
                 className="relative aspect-square rounded-lg overflow-hidden"
               >
                 <img
-                  src={cozycupImage}
-                  alt="CozyCup - Premium Insulated Coffee Cup"
+                  src={featuredProduct.image}
+                  alt={featuredProduct.name}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-cosmic-dark/60 to-transparent" />
@@ -60,7 +63,7 @@ export const FeaturedProduct = () => {
                     transition={{ delay: 0.2 }}
                     className="text-3xl md:text-4xl font-heading font-bold mb-2 text-gradient-cyan"
                   >
-                    CozyCup
+                    {featuredProduct.name}
                   </motion.h3>
                   <motion.p
                     initial={{ opacity: 0, x: -20 }}
@@ -69,7 +72,7 @@ export const FeaturedProduct = () => {
                     transition={{ delay: 0.3 }}
                     className="text-lg text-muted-foreground"
                   >
-                    Premium Insulated Coffee Cup
+                    {featuredProduct.category}
                   </motion.p>
                 </div>
 
@@ -80,10 +83,7 @@ export const FeaturedProduct = () => {
                   transition={{ delay: 0.4 }}
                   className="text-foreground leading-relaxed"
                 >
-                  Transform your coffee ritual with CozyCup. Engineered with double-wall vacuum insulation, 
-                  this sleek companion keeps your beverages at the perfect temperature for hours. Whether 
-                  you're conquering your morning commute or powering through late-night work sessions, 
-                  CozyCup delivers consistent comfort in every sip.
+                  {featuredProduct.fullDescription}
                 </motion.p>
 
                 <motion.div
