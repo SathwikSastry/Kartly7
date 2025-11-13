@@ -88,7 +88,7 @@ export const HeroSection = () => {
         >
           <Link to="/product/cozycup">
             <Button variant="hero" size="lg">
-              Explore CozyCup
+              Explore Kartly7
               <ChevronRight className="ml-2" />
             </Button>
           </Link>

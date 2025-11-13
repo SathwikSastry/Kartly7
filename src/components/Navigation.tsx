@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import kartly7Logo from "@/assets/kartly7-logo.png";
 
 /**
  * Navigation - Floating glassmorphic navigation bar
@@ -47,8 +48,9 @@ export const Navigation = () => {
       <div className="container max-w-6xl mx-auto">
         <div className="glass-card flex items-center justify-between px-6 py-4">
           {/* Logo */}
-          <Link to="/">
-            <h1 className="text-2xl font-heading font-bold text-gradient-cosmic">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={kartly7Logo} alt="Kartly7" className="w-10 h-10 object-contain" />
+            <h1 className="text-2xl font-heading font-bold text-gradient-cosmic hidden sm:block">
               KARTLY7
             </h1>
           </Link>
@@ -57,9 +59,15 @@ export const Navigation = () => {
             {/* Auth Status */}
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground hidden sm:inline truncate max-w-[150px]">
-                  {user.email}
-                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/profile')}
+                  className="gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profile</span>
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

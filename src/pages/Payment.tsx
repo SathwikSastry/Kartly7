@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Upload, Loader2 } from "lucide-react";
@@ -10,6 +10,8 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserPoints } from "@/hooks/useUserPoints";
+import { calculatePointsEarned } from "@/utils/points";
 
 /**
  * Payment Page - UPI payment verification
@@ -19,10 +21,28 @@ const Payment = () => {
   const navigate = useNavigate();
   const { items, totalAmount, clearCart } = useCart();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+  const { updatePoints } = useUserPoints(userId);
   
   const [transactionId, setTransactionId] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pointsDiscount, setPointsDiscount] = useState(0);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    // Get points discount from checkout data
+    const checkoutData = sessionStorage.getItem('checkout-data');
+    if (checkoutData) {
+      const data = JSON.parse(checkoutData);
+      setPointsDiscount(data.pointsDiscount || 0);
+      setPointsToRedeem(data.pointsToRedeem || 0);
+    }
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -103,6 +123,8 @@ const Payment = () => {
         screenshotPath = fileName;
       }
 
+      const finalAmount = totalAmount - pointsDiscount;
+      
       // Submit order via edge function with server-side validation
       const { data, error } = await supabase.functions.invoke('submit-order', {
         body: {
@@ -111,13 +133,25 @@ const Payment = () => {
           phone: customerInfo.phone,
           address: customerInfo.address,
           products: items,
-          total_amount: totalAmount,
+          total_amount: finalAmount,
           screenshot_path: screenshotPath,
           transaction_id: transactionId || null,
         }
       });
 
       if (error) throw error;
+
+      // Calculate and award points for the order
+      const pointsEarned = calculatePointsEarned(finalAmount);
+      
+      // Update user points (add earned, subtract redeemed)
+      const netPointsChange = pointsEarned - pointsToRedeem;
+      if (netPointsChange !== 0) {
+        await updatePoints(netPointsChange, data.order_id);
+      }
+
+      // Store order total for success page
+      sessionStorage.setItem('order-total', finalAmount.toString());
 
       // Clear cart and checkout data
       clearCart();
@@ -163,10 +197,15 @@ const Payment = () => {
             <div className="space-y-4 mb-8 text-muted-foreground">
               <p>Please complete the payment using UPI and provide verification details:</p>
               <ol className="list-decimal list-inside space-y-2">
-                <li>Make payment of <span className="text-neon-gold font-bold">₹{totalAmount.toFixed(2)}</span> to our UPI ID</li>
+                <li>Make payment of <span className="text-neon-gold font-bold">₹{(totalAmount - pointsDiscount).toFixed(2)}</span> to our UPI ID</li>
                 <li>Take a screenshot of the successful transaction</li>
                 <li>Upload the screenshot below OR enter your transaction ID</li>
               </ol>
+              {pointsDiscount > 0 && (
+                <p className="text-sm text-green-400">
+                  ✨ Kartly7 Points discount of ₹{pointsDiscount.toFixed(2)} has been applied!
+                </p>
+              )}
               <p className="text-sm italic">PhonePe payment link will be integrated soon for direct checkout.</p>
             </div>
 

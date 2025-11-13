@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
@@ -55,6 +55,68 @@ export type Database = {
           status?: string | null
           total_amount?: number
           transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      points_transactions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          points_change: number
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points_change: number
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          points_change?: number
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_points: {
+        Row: {
+          id: string
+          tier: string
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          tier?: string
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          tier?: string
+          total_points?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

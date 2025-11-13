@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
@@ -9,6 +9,9 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Navigation } from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { RedeemPointsToggle } from "@/components/points/RedeemPointsToggle";
+import { useUserPoints } from "@/hooks/useUserPoints";
+import { calculatePointsEarned } from "@/utils/points";
 
 /**
  * Checkout Page - Collects customer shipping information
@@ -18,6 +21,10 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalAmount } = useCart();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+  const { userPoints } = useUserPoints(userId);
+  const [pointsDiscount, setPointsDiscount] = useState(0);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -25,6 +32,12 @@ const Checkout = () => {
     phone: "",
     address: "",
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,9 +87,16 @@ const Checkout = () => {
     }
 
     // Store in session storage for payment page
-    sessionStorage.setItem('checkout-data', JSON.stringify(formData));
+    sessionStorage.setItem('checkout-data', JSON.stringify({
+      ...formData,
+      pointsDiscount,
+      pointsToRedeem,
+    }));
     navigate('/payment');
   };
+
+  const finalAmount = totalAmount - pointsDiscount;
+  const pointsWillEarn = calculatePointsEarned(finalAmount);
 
   if (items.length === 0) {
     navigate('/cart');
@@ -184,11 +204,51 @@ const Checkout = () => {
 
               <div className="h-px bg-border mb-4" />
               
-              <div className="flex justify-between text-xl font-bold mb-2">
-                <span>Total</span>
-                <span className="text-neon-gold">₹{totalAmount.toFixed(2)}</span>
+              <div className="flex justify-between text-lg mb-2">
+                <span>Subtotal</span>
+                <span>₹{totalAmount.toFixed(2)}</span>
               </div>
+
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-lg text-green-400 mb-2">
+                  <span>Points Discount</span>
+                  <span>-₹{pointsDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="h-px bg-border mb-4" />
+
+              <div className="flex justify-between text-xl font-bold mb-4">
+                <span>Total</span>
+                <span className="text-neon-gold">₹{finalAmount.toFixed(2)}</span>
+              </div>
+
+              {pointsWillEarn > 0 && (
+                <div className="text-xs text-muted-foreground text-center p-2 rounded-lg bg-neon-cyan/10">
+                  🎁 You'll earn {pointsWillEarn} Kartly7 Points from this order!
+                </div>
+              )}
             </GlassCard>
+
+            {/* Points Redemption */}
+            {userPoints && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-6"
+              >
+                <RedeemPointsToggle
+                  availablePoints={userPoints.total_points}
+                  tier={userPoints.tier}
+                  orderAmount={totalAmount}
+                  onRedemptionChange={(points, discount) => {
+                    setPointsToRedeem(points);
+                    setPointsDiscount(discount);
+                  }}
+                />
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>

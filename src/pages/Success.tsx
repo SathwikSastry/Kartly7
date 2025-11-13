@@ -3,15 +3,35 @@ import { CheckCircle, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserPoints } from "@/hooks/useUserPoints";
+import { EarnedPointsDisplay } from "@/components/points/EarnedPointsDisplay";
 
 /**
  * Success Page - Order confirmation with celebration animation
  * Shows thank you message and option to continue shopping
  */
 const Success = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const { userPoints } = useUserPoints(userId);
+  const [orderAmount, setOrderAmount] = useState(0);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Get user ID
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    // Retrieve order amount from sessionStorage
+    const checkoutData = sessionStorage.getItem('checkout-data');
+    if (checkoutData) {
+      const data = JSON.parse(checkoutData);
+      const amount = parseFloat(sessionStorage.getItem('order-total') || '0');
+      setOrderAmount(amount || 0);
+    }
   }, []);
 
   return (
@@ -87,6 +107,16 @@ const Success = () => {
                 We've sent a confirmation email with your order details. Our team will verify your payment and process your order shortly.
               </p>
             </div>
+
+            {/* Points Earned Display */}
+            {userPoints && orderAmount > 0 && (
+              <div className="mb-8">
+                <EarnedPointsDisplay 
+                  orderAmount={orderAmount}
+                  tier={userPoints.tier}
+                />
+              </div>
+            )}
 
             <Link to="/">
               <Button variant="hero" size="lg" className="w-full sm:w-auto">

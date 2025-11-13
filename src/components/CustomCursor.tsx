@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 /**
- * CustomCursor - Creates a radial gradient lightning effect that follows the default cursor
- * Provides a futuristic, immersive feel while maintaining native cursor functionality
+ * CustomCursor - Lightning effect that follows the cursor
+ * Does NOT hide the default cursor - just adds visual enhancement
  */
 export const CustomCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
