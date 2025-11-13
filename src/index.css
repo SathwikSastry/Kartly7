@@ -110,7 +110,7 @@ All colors MUST be HSL.
       hsl(270, 40%, 10%) 50%, 
       hsl(240, 45%, 8%) 100%);
     background-attachment: fixed;
-    cursor: none;
+    cursor: auto;
   }
 
   /* Custom cursor */
