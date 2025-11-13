@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
 import { WhyKartly7 } from "@/components/WhyKartly7";
 import { FeaturedProduct } from "@/components/FeaturedProduct";
+import { ProductGrid } from "@/components/ProductGrid";
 import { SocialHandles } from "@/components/SocialHandles";
 import { Footer } from "@/components/Footer";
 
@@ -30,6 +31,7 @@ const Landing = () => {
       <main>
         <HeroSection />
         <FeaturedProduct />
+        <ProductGrid />
         <WhyKartly7 />
         <SocialHandles />
       </main>

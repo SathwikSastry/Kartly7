@@ -110,7 +110,7 @@ export const FeaturedProduct = () => {
                   viewport={{ once: true }}
                   transition={{ delay: 0.6 }}
                 >
-                  <Link to="/product/cozycup">
+                  <Link to={`/product/${featuredProduct.slug}`}>
                     <Button variant="hero" size="lg">
                       View Full Details
                       <ArrowRight className="ml-2" />

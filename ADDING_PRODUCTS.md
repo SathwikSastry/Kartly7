@@ -5,7 +5,12 @@ Kartly7 uses a flexible product management system that allows you to add product
 1. **Static Method** (Quick & Easy) - Update `products.ts` file via Lovable
 2. **Dynamic Method** (Scalable) - Manage products via Supabase database
 
-Both methods work seamlessly with the existing product page template (`/product/:slug`) and automatically display new products on the landing page.
+Both methods work seamlessly with the existing product page template (`/product/:slug`).
+
+**✅ Automatic Display**: All products added to `products.ts` automatically appear on:
+- **Home page product grid** (responsive 1-3 column layout)
+- **Individual product detail pages** (`/product/:slug`)
+- **Featured product section** (first product in array)
 
 ---
 
