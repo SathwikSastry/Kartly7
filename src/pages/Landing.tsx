@@ -1,4 +1,4 @@
-import { ParticleBackground } from "@/components/ParticleBackground";
+import { lazy, Suspense } from "react";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
@@ -6,6 +6,12 @@ import { WhyKartly7 } from "@/components/WhyKartly7";
 import { FeaturedProduct } from "@/components/FeaturedProduct";
 import { SocialHandles } from "@/components/SocialHandles";
 import { Footer } from "@/components/Footer";
+
+const ParticleBackground = lazy(() => 
+  import("@/components/ParticleBackground").then(module => ({ 
+    default: module.ParticleBackground 
+  }))
+);
 
 /**
  * Landing Page - Main entry point for Kartly7
@@ -15,7 +21,9 @@ import { Footer } from "@/components/Footer";
 const Landing = () => {
   return (
     <div className="relative min-h-screen">
-      <ParticleBackground />
+      <Suspense fallback={null}>
+        <ParticleBackground />
+      </Suspense>
       <CustomCursor />
       <Navigation />
       
