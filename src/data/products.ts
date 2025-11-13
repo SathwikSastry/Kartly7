@@ -79,6 +79,30 @@ export const products: Product[] = [
 ];
 
 /**
+ * Validate product data for duplicate slugs/ids
+ */
+const validateProducts = () => {
+  const slugs = products.map(p => p.slug);
+  const ids = products.map(p => p.id);
+  const duplicateSlugs = slugs.filter((slug, index) => slugs.indexOf(slug) !== index);
+  const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+  
+  if (duplicateSlugs.length > 0) {
+    console.error("❌ Duplicate product slugs detected:", [...new Set(duplicateSlugs)]);
+  }
+  if (duplicateIds.length > 0) {
+    console.error("❌ Duplicate product IDs detected:", [...new Set(duplicateIds)]);
+  }
+  
+  return duplicateSlugs.length === 0 && duplicateIds.length === 0;
+};
+
+// Run validation in development
+if (import.meta.env.DEV) {
+  validateProducts();
+}
+
+/**
  * Helper function to get a product by slug
  * Returns undefined if product not found
  */

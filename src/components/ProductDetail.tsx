@@ -40,6 +40,16 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
   const images = product.images || [product.image];
 
   const handleAddToCart = () => {
+    // Check if product is in stock
+    if (!product.inStock) {
+      toast({
+        title: "Out of Stock",
+        description: "This product is currently unavailable",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Add the item first
     addToCart({
       id: product.id,
