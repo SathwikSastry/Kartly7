@@ -17,7 +17,7 @@
  * <ProductDetail product={productData} />
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Product } from "@/types/product";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -26,6 +26,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Heart, Share2, Check } from "lucide-react";
 import * as LucideIcons from "lucide-react";
+import { GoldenStarAnimation } from "@/components/GoldenStarAnimation";
 
 interface ProductDetailProps {
   product: Product;
@@ -34,6 +35,9 @@ interface ProductDetailProps {
 export const ProductDetail = ({ product }: ProductDetailProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [showStarAnimation, setShowStarAnimation] = useState(false);
+  const [starPositions, setStarPositions] = useState({ start: { x: 0, y: 0 }, end: { x: 0, y: 0 } });
+  const addToCartButtonRef = useRef<HTMLButtonElement>(null);
   const { addToCart, updateQuantity } = useCart();
   const { toast } = useToast();
 
@@ -48,6 +52,27 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Get button position for star animation
+    if (addToCartButtonRef.current) {
+      const buttonRect = addToCartButtonRef.current.getBoundingClientRect();
+      const cartIcon = document.querySelector('[data-cart-icon]');
+      
+      if (cartIcon) {
+        const cartRect = cartIcon.getBoundingClientRect();
+        setStarPositions({
+          start: {
+            x: buttonRect.left + buttonRect.width / 2,
+            y: buttonRect.top + buttonRect.height / 2,
+          },
+          end: {
+            x: cartRect.left + cartRect.width / 2,
+            y: cartRect.top + cartRect.height / 2,
+          },
+        });
+        setShowStarAnimation(true);
+      }
     }
 
     // Add the item first
@@ -73,7 +98,15 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <>
+      {showStarAnimation && (
+        <GoldenStarAnimation
+          startPosition={starPositions.start}
+          endPosition={starPositions.end}
+          onComplete={() => setShowStarAnimation(false)}
+        />
+      )}
+      <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         {/* Image Gallery Section */}
         <motion.div
@@ -195,6 +228,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
 
             <div className="flex gap-3">
               <Button
+                ref={addToCartButtonRef}
                 variant="hero"
                 size="lg"
                 className="flex-1"
@@ -268,6 +302,7 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
           </div>
         </motion.div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
