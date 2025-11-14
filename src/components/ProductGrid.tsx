@@ -74,7 +74,7 @@ export const ProductGrid = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} featured={product.isComingSoon} />
             </motion.div>
           ))}
         </div>

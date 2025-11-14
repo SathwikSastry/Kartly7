@@ -128,3 +128,33 @@ export const getProductsByCategory = (category: string): Product[] => {
 export const getFeaturedProducts = (): Product[] => {
   return products.filter(product => product.inStock);
 };
+
+// Coming Soon Product
+const comingSoonProduct: Product = {
+  id: "coming-soon",
+  name: "New Products",
+  slug: "coming-soon",
+  image: "/placeholder.svg",
+  shortDescription: "Exciting new products launching soon. Stay tuned!",
+  fullDescription: "We're working on something special. New innovative products will be available soon. Check back regularly for updates!",
+  price: 0,
+  features: [
+    {
+      icon: "Sparkles",
+      title: "Coming Soon",
+      description: "New products launching soon"
+    }
+  ],
+  specifications: [
+    {
+      label: "Status",
+      value: "Coming Soon"
+    }
+  ],
+  category: "upcoming",
+  inStock: false,
+  isComingSoon: true
+};
+
+// Add coming soon product to the products array
+products.push(comingSoonProduct);

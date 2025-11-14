@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { ShoppingCart, User, LogOut } from "lucide-react";
+import { ShoppingCart, User, LogOut, Moon, Sun, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 import kartly7Logo from "@/assets/kartly7-logo.png";
 
 /**
@@ -17,6 +18,7 @@ export const Navigation = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -46,16 +48,38 @@ export const Navigation = () => {
       className="fixed top-0 left-0 right-0 z-50 px-4 py-4 backdrop-blur-md bg-background/30"
     >
       <div className="container max-w-6xl mx-auto">
-        <div className="glass-card flex items-center justify-between px-6 py-4">
+        <div className="glass-card flex items-center justify-between px-4 sm:px-6 py-4 gap-2">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <img src={kartly7Logo} alt="Kartly7" className="w-10 h-10 object-contain" />
-            <h1 className="text-2xl font-heading font-bold text-gradient-cosmic hidden sm:block">
-              KARTLY7
-            </h1>
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <img src={kartly7Logo} alt="Kartly7" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
+            <div className="flex flex-col">
+              <h1 className="text-lg sm:text-2xl font-heading font-bold text-gradient-cosmic whitespace-nowrap hidden sm:block">
+                KARTLY7
+              </h1>
+            </div>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* New Products Tag */}
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon-gold/10 border border-neon-gold/20">
+            <Sparkles className="w-4 h-4 text-neon-gold" />
+            <span className="text-xs font-medium text-neon-gold whitespace-nowrap">New Products Coming Soon</span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="gap-2"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </Button>
+
             {/* Auth Status */}
             {user ? (
               <>

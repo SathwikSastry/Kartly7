@@ -54,10 +54,18 @@ export const ProductCard = ({ product, featured = false }: ProductCardProps) => 
             />
             
             {/* Badge for featured products */}
-            {featured && (
+            {featured && !product.isComingSoon && (
               <div className="absolute top-4 right-4 glass-strong px-3 py-1 rounded-full flex items-center gap-1">
                 <Star className="w-4 h-4 text-neon-gold fill-neon-gold" />
                 <span className="text-xs font-semibold text-neon-gold">Featured</span>
+              </div>
+            )}
+            
+            {/* Coming Soon Badge */}
+            {product.isComingSoon && (
+              <div className="absolute top-4 right-4 glass-strong px-3 py-1 rounded-full flex items-center gap-1 bg-neon-gold/20 border border-neon-gold/30">
+                <Star className="w-4 h-4 text-neon-gold" />
+                <span className="text-xs font-semibold text-neon-gold">Launching Soon</span>
               </div>
             )}
             

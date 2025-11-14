@@ -107,201 +107,212 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
         />
       )}
       <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Image Gallery Section */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <GlassCard className="p-4" strong>
-            {/* Main Image */}
-            <div className="relative overflow-hidden rounded-lg mb-4 aspect-square">
-              <motion.img
-                key={selectedImage}
-                src={images[selectedImage]}
-                alt={`${product.name} - View ${selectedImage + 1}`}
-                className="w-full h-full object-cover"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Left Column: Image Gallery + Benefits + Specifications */}
+          <div className="space-y-6">
+            {/* Image Gallery Section */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <GlassCard className="p-4" strong>
+                {/* Main Image */}
+                <div className="relative overflow-hidden rounded-lg mb-4 aspect-square">
+                  <motion.img
+                    key={selectedImage}
+                    src={images[selectedImage]}
+                    alt={`${product.name} - View ${selectedImage + 1}`}
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    whileHover={{ scale: 1.05 }}
+                  />
+                </div>
+
+                {/* Thumbnail Gallery */}
+                {images.length > 1 && (
+                  <div className="grid grid-cols-5 gap-2">
+                    {images.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`relative overflow-hidden rounded-lg aspect-square border-2 transition-all ${
+                          selectedImage === index
+                            ? "border-primary glow-cyan"
+                            : "border-border/50 hover:border-primary/50"
+                        }`}
+                      >
+                        <img
+                          src={img}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </GlassCard>
+            </motion.div>
+
+            {/* Benefits Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gradient-cyan">
+                Benefits
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {product.features.map((feature, index) => {
+                  const IconComponent = (LucideIcons as any)[feature.icon] || Check;
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <GlassCard className="h-full">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <IconComponent className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold mb-1">{feature.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {feature.description}
+                            </p>
+                          </div>
+                        </div>
+                      </GlassCard>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* Specifications Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gradient-purple">
+                Specifications
+              </h2>
+              <GlassCard>
+                <div className="space-y-3">
+                  {product.specifications.map((spec, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
+                    >
+                      <span className="text-muted-foreground">{spec.label}</span>
+                      <span className="font-semibold">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Product Info (Sticky) */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="lg:sticky lg:top-24 space-y-6"
+          >
+            {/* Title and Price */}
+            <div>
+              <h1 className="text-4xl font-bold mb-2 text-gradient-cyan">
+                {product.name}
+              </h1>
+              <p className="text-muted-foreground mb-4">{product.category}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold text-foreground">
+                  ₹{(product.price / 100).toFixed(0)}
+                </span>
+                <span className="text-lg text-muted-foreground">/-</span>
+              </div>
             </div>
 
-            {/* Thumbnail Gallery */}
-            {images.length > 1 && (
-              <div className="grid grid-cols-5 gap-2">
-                {images.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative overflow-hidden rounded-lg aspect-square border-2 transition-all ${
-                      selectedImage === index
-                        ? "border-primary glow-cyan"
-                        : "border-border/50 hover:border-primary/50"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+            {/* Description */}
+            <GlassCard>
+              <p className="text-foreground/90 leading-relaxed">
+                {product.fullDescription}
+              </p>
+            </GlassCard>
+
+            {/* Color Options */}
+            {product.colors && product.colors.length > 0 && (
+              <GlassCard>
+                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
+                  Available Colors
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <div
+                      key={color}
+                      className="px-3 py-1 rounded-full glass-strong text-sm"
+                    >
+                      {color}
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
             )}
-          </GlassCard>
-        </motion.div>
 
-        {/* Product Information Section */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
-        >
-          {/* Title and Price */}
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-gradient-cyan">
-              {product.name}
-            </h1>
-            <p className="text-muted-foreground mb-4">{product.category}</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-foreground">
-                ₹{(product.price / 100).toFixed(0)}
-              </span>
-              <span className="text-lg text-muted-foreground">/-</span>
-            </div>
-          </div>
-
-          {/* Description */}
-          <GlassCard>
-            <p className="text-foreground/90 leading-relaxed">
-              {product.fullDescription}
-            </p>
-          </GlassCard>
-
-          {/* Color Options */}
-          {product.colors && product.colors.length > 0 && (
-            <GlassCard>
-              <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
-                Available Colors
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {product.colors.map((color) => (
-                  <div
-                    key={color}
-                    className="px-3 py-1 rounded-full glass-strong text-sm"
+            {/* Quantity and Actions */}
+            <GlassCard className="space-y-4">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-semibold text-muted-foreground">
+                  Quantity:
+                </label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   >
-                    {color}
-                  </div>
-                ))}
+                    -
+                  </Button>
+                  <span className="w-12 text-center font-semibold">{quantity}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    +
+                  </Button>
+                </div>
               </div>
-            </GlassCard>
-          )}
 
-          {/* Quantity and Actions */}
-          <GlassCard className="space-y-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-semibold text-muted-foreground">
-                Quantity:
-              </label>
-              <div className="flex items-center gap-2">
+              <div className="flex gap-3">
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  ref={addToCartButtonRef}
+                  variant="hero"
+                  size="lg"
+                  className="flex-1"
+                  onClick={handleAddToCart}
+                  disabled={!product.inStock}
                 >
-                  -
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {product.inStock ? "Add to Cart" : "Out of Stock"}
                 </Button>
-                <span className="w-12 text-center font-semibold">{quantity}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setQuantity(quantity + 1)}
-                >
-                  +
+                <Button variant="outline" size="lg">
+                  <Heart className="w-5 h-5" />
+                </Button>
+                <Button variant="outline" size="lg">
+                  <Share2 className="w-5 h-5" />
                 </Button>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                ref={addToCartButtonRef}
-                variant="hero"
-                size="lg"
-                className="flex-1"
-                onClick={handleAddToCart}
-                disabled={!product.inStock}
-              >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                {product.inStock ? "Add to Cart" : "Out of Stock"}
-              </Button>
-              <Button variant="outline" size="lg">
-                <Heart className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="lg">
-                <Share2 className="w-5 h-5" />
-              </Button>
-            </div>
-          </GlassCard>
-
-          {/* Features */}
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-gradient-purple">
-              Key Features
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {product.features.map((feature, index) => {
-                const IconComponent = (LucideIcons as any)[feature.icon] || Check;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <GlassCard className="h-full">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <IconComponent className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-1">{feature.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {feature.description}
-                          </p>
-                        </div>
-                      </div>
-                    </GlassCard>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Specifications */}
-          <div>
-            <h2 className="text-2xl font-bold mb-4 text-gradient-purple">
-              Specifications
-            </h2>
-            <GlassCard>
-              <div className="space-y-3">
-                {product.specifications.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center py-2 border-b border-border/50 last:border-0"
-                  >
-                    <span className="text-muted-foreground">{spec.label}</span>
-                    <span className="font-semibold">{spec.value}</span>
-                  </div>
-                ))}
-              </div>
             </GlassCard>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
       </div>
     </>
   );

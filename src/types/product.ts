@@ -30,4 +30,5 @@ export interface Product {
   colors?: string[];
   inStock: boolean;
   category: string;
+  isComingSoon?: boolean;
 }
