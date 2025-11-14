@@ -43,7 +43,7 @@ export const Navigation = () => {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 px-4 py-4"
+      className="fixed top-0 left-0 right-0 z-50 px-4 py-4 backdrop-blur-md bg-background/30"
     >
       <div className="container max-w-6xl mx-auto">
         <div className="glass-card flex items-center justify-between px-6 py-4">
@@ -96,6 +96,7 @@ export const Navigation = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+                data-cart-icon
               >
                 <ShoppingCart className="w-6 h-6 text-primary" />
                 {totalItems > 0 && (
