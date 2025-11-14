@@ -24,6 +24,10 @@ export const products: Product[] = [
     image: cozycupHero,
     images: [
       cozycupHero,
+      cozycupHero, // Add more unique images here when available
+      cozycupHero, // Different angle
+      cozycupHero, // Close-up shot
+      cozycupHero, // Product in use
     ],
     shortDescription: "Premium 450ml insulated smart mug with digital temperature display and 360° leak-proof technology.",
     fullDescription: "Experience the perfect temperature every time with CozyCup Premium. Featuring advanced 316 stainless steel construction, intelligent temperature monitoring, and industry-leading insulation that keeps your beverages hot for up to 12 hours or cold for 24 hours.",
