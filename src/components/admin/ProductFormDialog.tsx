@@ -55,8 +55,11 @@ export default function ProductFormDialog({
     is_active: true,
   });
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -72,6 +75,8 @@ export default function ProductFormDialog({
         category: product.category || "",
         is_active: product.is_active,
       });
+      setThumbnailPreview(product.thumbnail_url);
+      setImagePreviews(product.image_urls || []);
     } else {
       setFormData({
         name: "",
@@ -85,7 +90,9 @@ export default function ProductFormDialog({
         is_active: true,
       });
       setThumbnail(null);
+      setThumbnailPreview(null);
       setImages([]);
+      setImagePreviews([]);
     }
   }, [product]);
 
@@ -283,23 +290,49 @@ export default function ProductFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="thumbnail">Thumbnail Image</Label>
+            <Label htmlFor="thumbnail">Thumbnail Image *</Label>
+            <p className="text-xs text-muted-foreground">This will be shown in "Our Collection" section</p>
+            {thumbnailPreview && (
+              <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
+                <img src={thumbnailPreview} alt="Thumbnail preview" className="w-full h-full object-cover" />
+              </div>
+            )}
             <Input
               id="thumbnail"
               type="file"
               accept="image/*"
-              onChange={(e) => setThumbnail(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setThumbnail(file);
+                  setThumbnailPreview(URL.createObjectURL(file));
+                }
+              }}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="images">Additional Images</Label>
+            <p className="text-xs text-muted-foreground">Product gallery images</p>
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {imagePreviews.map((url, idx) => (
+                  <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
+                    <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
             <Input
               id="images"
               type="file"
               accept="image/*"
               multiple
-              onChange={(e) => setImages(Array.from(e.target.files || []))}
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                setImages(files);
+                setImagePreviews(files.map(f => URL.createObjectURL(f)));
+              }}
             />
           </div>
 

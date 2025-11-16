@@ -32,6 +32,7 @@ const Checkout = () => {
     phone: "",
     address: "",
   });
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -91,7 +92,17 @@ const Checkout = () => {
       ...formData,
       pointsDiscount,
       pointsToRedeem,
+      paymentMethod,
     }));
+    
+    if (paymentMethod === 'cod') {
+      toast({
+        title: "COD Order Placed! 📦",
+        description: "We verify all COD orders to make sure everything goes smoothly with delivery to your area. You'll hear from us by 7 PM with confirmation!",
+        duration: 6000,
+      });
+    }
+    
     navigate('/payment');
   };
 
@@ -168,14 +179,54 @@ const Checkout = () => {
                     id="address"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Enter your complete delivery address"
+                    placeholder="House/Flat No., Street, Area, City, State, PIN Code"
                     className="mt-2 flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     rows={4}
                     required
                   />
                 </div>
 
-                <Button type="submit" variant="hero" size="lg" className="w-full">
+                {/* Payment Method Selection */}
+                <div className="space-y-3">
+                  <Label>Payment Method *</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("online")}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        paymentMethod === "online"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-semibold">Online Payment</div>
+                      <div className="text-sm text-muted-foreground mt-1">UPI / Card</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("cod")}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        paymentMethod === "cod"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-semibold">Cash on Delivery</div>
+                      <div className="text-sm text-muted-foreground mt-1">Pay at delivery</div>
+                    </button>
+                  </div>
+                  {paymentMethod === "cod" && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-muted-foreground bg-accent/10 border border-accent/20 rounded-lg p-3"
+                    >
+                      ℹ️ We verify all COD orders to ensure smooth delivery to your area. You'll receive confirmation by 7 PM!
+                    </motion.p>
+                  )}
+                </div>
+
+                <Button type="submit" variant="hero" size="lg" className="w-full mt-6">
                   Continue to Payment
                 </Button>
               </form>

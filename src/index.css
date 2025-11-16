@@ -8,66 +8,61 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Cosmic Dark Theme - Kartly7 */
-    --background: 240 45% 8%;
-    --foreground: 180 100% 95%;
-
-    --card: 240 35% 12%;
-    --card-foreground: 180 100% 95%;
-
-    --popover: 240 40% 10%;
-    --popover-foreground: 180 100% 95%;
-
-    /* Neon Cyan Primary */
-    --primary: 180 100% 50%;
-    --primary-foreground: 240 45% 8%;
-
-    /* Deep Purple Secondary */
-    --secondary: 270 60% 45%;
-    --secondary-foreground: 180 100% 95%;
-
-    /* Muted Glass */
-    --muted: 240 20% 20%;
-    --muted-foreground: 180 20% 70%;
-
-    /* Magenta Accent */
-    --accent: 300 100% 50%;
-    --accent-foreground: 180 100% 95%;
-
+    /* Light Theme - Kartly7 */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    --primary: 180 100% 40%;
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 270 50% 50%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    --accent: 300 80% 50%;
+    --accent-foreground: 0 0% 98%;
+    
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 180 100% 95%;
-
-    /* Glass borders with subtle glow */
-    --border: 240 20% 25%;
-    --input: 240 20% 25%;
-    --ring: 180 100% 50%;
-
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 180 100% 40%;
+    
     --radius: 1rem;
-
+    
     /* Custom Kartly7 Tokens */
     --neon-gold: 45 100% 51%;
-    --neon-cyan: 180 100% 50%;
-    --neon-purple: 270 60% 45%;
-    --neon-magenta: 300 100% 50%;
-    --cosmic-dark: 240 45% 8%;
-    --cosmic-darker: 240 50% 5%;
-    --glass-border: 240 20% 35%;
-    --glow-cyan: 180 100% 60%;
-    --glow-purple: 270 70% 55%;
-    --glow-magenta: 300 100% 60%;
+    --neon-cyan: 180 100% 40%;
+    --neon-purple: 270 50% 50%;
+    --neon-magenta: 300 80% 50%;
+    --cosmic-dark: 0 0% 100%;
+    --cosmic-darker: 240 4.8% 95.9%;
+    --glass-border: 240 5.9% 80%;
+    --glow-cyan: 180 100% 45%;
+    --glow-purple: 270 60% 55%;
+    --glow-magenta: 300 80% 55%;
 
-    --sidebar-background: 240 40% 10%;
-    --sidebar-foreground: 180 100% 95%;
-    --sidebar-primary: 180 100% 50%;
-    --sidebar-primary-foreground: 240 45% 8%;
-    --sidebar-accent: 270 60% 45%;
-    --sidebar-accent-foreground: 180 100% 95%;
-    --sidebar-border: 240 20% 25%;
-    --sidebar-ring: 180 100% 50%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 180 100% 40%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 270 50% 50%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 180 100% 40%;
   }
 
   .dark {
-    /* Keep same as root since we're always dark mode */
+    /* Dark Theme - Kartly7 (Default) */
     --background: 240 45% 8%;
     --foreground: 180 100% 95%;
     --card: 240 35% 12%;
@@ -105,12 +100,23 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground antialiased;
+    cursor: auto;
+  }
+
+  body.dark {
     background: linear-gradient(135deg, 
       hsl(240, 50%, 5%) 0%, 
       hsl(270, 40%, 10%) 50%, 
       hsl(240, 45%, 8%) 100%);
     background-attachment: fixed;
-    cursor: auto;
+  }
+
+  body:not(.dark) {
+    background: linear-gradient(135deg, 
+      hsl(0, 0%, 100%) 0%, 
+      hsl(240, 5%, 98%) 50%, 
+      hsl(240, 10%, 96%) 100%);
+    background-attachment: fixed;
   }
 
   /* Custom cursor */
