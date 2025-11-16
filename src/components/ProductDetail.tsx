@@ -228,24 +228,67 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
           >
             {/* Title and Price */}
             <div>
-              <h1 className="text-4xl font-bold mb-2 text-gradient-cyan">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gradient-cyan">
                 {product.name}
               </h1>
               <p className="text-muted-foreground mb-4">{product.category}</p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-foreground">
-                  ₹{(product.price / 100).toFixed(0)}
+              
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-sm text-muted-foreground line-through">
+                  ₹2,999
                 </span>
-                <span className="text-lg text-muted-foreground">/-</span>
+                <span className="text-3xl md:text-4xl font-bold text-gradient-cosmic">
+                  ₹{product.price.toLocaleString()}
+                </span>
+                <span className="text-xs md:text-sm text-green-400 font-medium bg-green-500/10 px-2 md:px-3 py-1 rounded-full">
+                  Save ₹{(2999 - product.price).toLocaleString()}
+                </span>
               </div>
             </div>
 
             {/* Description */}
             <GlassCard>
-              <p className="text-foreground/90 leading-relaxed">
+              <p className="text-sm md:text-base text-foreground/90 leading-relaxed">
                 {product.fullDescription}
               </p>
             </GlassCard>
+
+            {/* Quantity Selector */}
+            <GlassCard className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                Quantity
+              </h3>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="h-10 w-10"
+                >
+                  -
+                </Button>
+                <span className="w-12 text-center font-semibold text-lg">{quantity}</span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="h-10 w-10"
+                >
+                  +
+                </Button>
+              </div>
+            </GlassCard>
+
+            {/* Add to Cart Button - Below price and description */}
+            <Button
+              ref={addToCartButtonRef}
+              onClick={handleAddToCart}
+              className="w-full h-12 md:h-14 text-base md:text-lg font-semibold"
+              disabled={!product.inStock}
+            >
+              <ShoppingCart className="mr-2 h-4 md:h-5 w-4 md:w-5" />
+              {product.inStock ? "Add to Cart" : "Out of Stock"}
+            </Button>
 
             {/* Color Options */}
             {product.colors && product.colors.length > 0 && (
@@ -257,60 +300,31 @@ export const ProductDetail = ({ product }: ProductDetailProps) => {
                   {product.colors.map((color) => (
                     <div
                       key={color}
-                      className="px-3 py-1 rounded-full glass-strong text-sm"
+                      className="flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg border border-border bg-card/50"
                     >
-                      {color}
+                      <div
+                        className="w-5 h-5 md:w-6 md:h-6 rounded-full border-2 border-border"
+                        style={{ backgroundColor: color }}
+                      />
+                      <span className="text-xs md:text-sm capitalize">{color}</span>
                     </div>
                   ))}
                 </div>
               </GlassCard>
             )}
 
-            {/* Quantity and Actions */}
-            <GlassCard className="space-y-4">
-              <div className="flex items-center gap-4">
-                <label className="text-sm font-semibold text-muted-foreground">
-                  Quantity:
-                </label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  >
-                    -
-                  </Button>
-                  <span className="w-12 text-center font-semibold">{quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuantity(quantity + 1)}
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  ref={addToCartButtonRef}
-                  variant="hero"
-                  size="lg"
-                  className="flex-1"
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock}
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  {product.inStock ? "Add to Cart" : "Out of Stock"}
-                </Button>
-                <Button variant="outline" size="lg">
-                  <Heart className="w-5 h-5" />
-                </Button>
-                <Button variant="outline" size="lg">
-                  <Share2 className="w-5 h-5" />
-                </Button>
-              </div>
-            </GlassCard>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="w-full">
+                <Heart className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Wishlist</span>
+                <span className="sm:hidden">Save</span>
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </Button>
+            </div>
           </motion.div>
         </div>
       </div>
